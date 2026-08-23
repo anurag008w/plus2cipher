@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Kivy
+.kivy/
+
+# Buildozer / python-for-android
+.buildozer/
+bin/
+
+# App-generated local data (settings, history db) -- never ship user data
+.plus2cipher/
+*.db
+*.db.corrupt
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Test artifacts
+/tmp/
+*.png.tmp

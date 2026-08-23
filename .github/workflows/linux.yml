@@ -1,0 +1,52 @@
+name: Linux
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Xvfb and clipboard tools (for the headless UI smoke test)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xclip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Compile-check every Python file
+        run: |
+          python -m compileall -q app tests main.py
+          find . -name "*.py" -not -path "./.venv/*" -not -path "./tests_manual/*" -print0 \
+            | xargs -0 -n1 python -m py_compile
+
+      - name: Run unit tests (cipher core, storage, settings)
+        run: python -m pytest tests/ -v
+
+      - name: Headless UI smoke test (boots the real app, visits every screen)
+        env:
+          PLUS2CIPHER_SMOKE_SCREENSHOTS: /tmp/plus2cipher-smoke-screenshots
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x800x24" \
+            python tests_manual/smoke_home.py
+
+      - name: Upload smoke-test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-screenshots
+          path: /tmp/plus2cipher-smoke-screenshots/*.png
+          if-no-files-found: ignore

@@ -1,0 +1,81 @@
+name: Release
+
+# Manual only, on purpose -- a "Release" is a real, versioned, public
+# artifact you publish deliberately, unlike the Android CI workflow (which
+# builds automatically on every push just to catch build breakage early).
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, e.g. 1.0.1 (no leading 'v')"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system dependencies (python-for-android / Buildozer)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git zip unzip openjdk-17-jdk autoconf libtool pkg-config \
+            zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 \
+            cmake libffi-dev libssl-dev automake build-essential \
+            libltdl-dev
+
+      - name: Install Buildozer and Cython
+        run: |
+          python -m pip install --upgrade pip
+          pip install buildozer==1.5.0 cython==0.29.36
+
+      - name: Set version from input
+        run: |
+          sed -i "s/^version = .*/version = ${{ inputs.version }}/" buildozer.spec
+          grep "^version = " buildozer.spec
+
+      - name: Cache Buildozer directories
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            .buildozer
+          key: buildozer-release-${{ hashFiles('buildozer.spec') }}
+          restore-keys: buildozer-release-
+
+      - name: Build debug-signed APK
+        # NOTE: this is a debug-signed build (installable/sideloadable
+        # immediately, no keystore setup needed). If you want a properly
+        # release-signed APK (e.g. for the Play Store), add a keystore as
+        # repo secrets and switch this step to `buildozer -v android
+        # release` plus a jarsigner/apksigner + zipalign step.
+        run: buildozer -v android debug
+
+      - name: Prepare release asset
+        run: |
+          mkdir -p dist
+          cp bin/*.apk "dist/plus2cipher-${{ inputs.version }}.apk"
+          ls -la dist/
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ inputs.version }}" \
+            "dist/plus2cipher-${{ inputs.version }}.apk" \
+            --title "+2 Cipher v${{ inputs.version }}" \
+            --notes "+2 Cipher v${{ inputs.version }}. Debug-signed APK -- install directly on Android with \"unknown sources\" allowed, or via ADB."

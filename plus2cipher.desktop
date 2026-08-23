@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=+2 Cipher
+Comment=A simple +2 / -2 text shift cipher tool
+Exec=__RUN_SCRIPT_PATH__
+Icon=__ICON_PATH__
+Terminal=false
+Categories=Utility;
+StartupWMClass=plus2cipher
