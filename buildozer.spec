@@ -13,9 +13,9 @@ version = 1.0.0
 
 requirements = python3,kivy==2.3.1,kivymd==1.2.0,plyer==2.1.0
 
-# +2 Cipher is a text-shift utility, not a game -- support both
+# +2 Cipher is a text-shift utility, not a game -- support both main
 # orientations since the responsive layout system handles both cleanly.
-orientation = all
+orientation = portrait,landscape
 fullscreen = 0
 
 icon.filename = %(source.dir)s/assets/icons/icon_512.png
