@@ -2,9 +2,14 @@
 ui/components/icons.py
 
 A consistent, non-emoji icon system (spec section 47), built on the Material
-Design Icons font that ships inside the kivymd package (fonts/materialdesign
-icons-webfont.ttf) plus its glyph name -> unicode codepoint table. No network
-access is required -- the font file is bundled with the pip dependency.
+Design Icons font. The font file and its glyph-name -> unicode codepoint
+table are vendored into assets/fonts/ (see assets/fonts/LICENSE.md) rather
+than imported from the kivymd package at runtime, because python-for-android
+has no build recipe for kivymd -- it falls back to an unconstrained `pip
+install kivymd` during the Android build, which pulls in dependency
+conflicts from newer kivymd releases and fails. Vendoring the two small
+files we actually use removes that dependency (and its risk) entirely
+without losing anything, since this app never uses any KivyMD widgets.
 
 Usage:
     from app.ui.components.icons import icon_char, ICON_FONT
@@ -13,15 +18,18 @@ Usage:
 
 from __future__ import annotations
 
+import json
+
+from ..asset_paths import ICONS_DIR
 import os
 
-try:
-    import kivymd
+_FONTS_DIR = os.path.join(os.path.dirname(ICONS_DIR), "fonts")
+ICON_FONT = os.path.join(_FONTS_DIR, "materialdesignicons-webfont.ttf")
 
-    ICON_FONT = os.path.join(os.path.dirname(kivymd.__file__), "fonts", "materialdesignicons-webfont.ttf")
-    from kivymd.icon_definitions import md_icons
-except Exception:  # pragma: no cover - defensive fallback if kivymd is absent
-    ICON_FONT = None
+try:
+    with open(os.path.join(_FONTS_DIR, "md_icons.json"), "r", encoding="utf-8") as _f:
+        md_icons = json.load(_f)
+except Exception:  # pragma: no cover - defensive fallback if the asset is missing
     md_icons = {}
 
 # Semantic name -> Material Design Icons glyph name, so the rest of the app
