@@ -59,6 +59,7 @@ p4a.branch = develop
 # remote-debugging patch this app needs. Pinned to a specific commit for
 # a reproducible build.
 p4a.commit = 7af1d1325ef460def993cc7871c43d04bc877a94
+p4a.local_recipes = ./p4a-recipes
 
 [buildozer]
 log_level = 2
