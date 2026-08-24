@@ -28,7 +28,12 @@ presplash.color = #070A13
 android.permissions =
 
 android.api = 34
-android.minapi = 23
+# Python 3.14 (what current python-for-android builds) uses preadv/pwritev
+# in Python/remote_debugging.c, which Android's libc only declares from
+# API 24 (Android 7.0) onward. Below that, the NDK sysroot headers don't
+# expose them and the build fails with an implicit-declaration error.
+# API 24 is a non-issue in practice (~0% of active devices are below it).
+android.minapi = 24
 android.ndk = 25b
 android.build_tools = 34.0.0
 android.archs = arm64-v8a,armeabi-v7a
