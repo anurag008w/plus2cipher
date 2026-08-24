@@ -30,9 +30,16 @@ android.permissions =
 android.api = 34
 android.minapi = 23
 android.ndk = 25b
+android.build_tools = 34.0.0
 android.archs = arm64-v8a,armeabi-v7a
 android.allow_backup = True
 android.logcat_filters = *:S python:D
+
+# Required for non-interactive CI builds -- without this, sdkmanager blocks
+# on an interactive license prompt that GitHub Actions can never answer,
+# and the build fails with "license is not accepted" even though nothing
+# is actually broken.
+android.accept_sdk_license = True
 
 p4a.branch = master
 
