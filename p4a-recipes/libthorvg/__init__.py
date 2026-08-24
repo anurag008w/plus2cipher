@@ -31,6 +31,31 @@ class LibThorVGRecipe(MesonRecipe):
     for bin in bins:
         built_libraries[f"lib{bin}bin.so"] = "install/bin"
 
+    def download(self):
+        import os
+        import sh
+        from pythonforandroid.logger import shprint
+        
+        # Manually download the tarball using curl to avoid urllib 404 / rate limit issues
+        dest_dir = self.ctx.packages_path
+        filename = f"v{self.version}.tar.gz"
+        dest_path = os.path.join(dest_dir, filename)
+        
+        if not os.path.exists(dest_path):
+            ensure_dir(dest_dir)
+            download_url = self.url.format(version=self.version)
+            print(f"Downloading libthorvg manually via curl: {download_url}")
+            try:
+                shprint(sh.curl, "-L", "--retry", "5", "--retry-delay", "2", "-o", dest_path, download_url)
+            except Exception as e:
+                print(f"Curl failed: {e}")
+                # Fallback to codeload URL directly
+                fallback_url = f"https://codeload.github.com/thorvg/thorvg/tar.gz/refs/tags/v{self.version}"
+                print(f"Trying fallback URL: {fallback_url}")
+                shprint(sh.curl, "-L", "-o", dest_path, fallback_url)
+                
+        super().download()
+
     def should_build(self, arch):
         return Recipe.should_build(self, arch)
 
