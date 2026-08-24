@@ -47,6 +47,16 @@ android.logcat_filters = *:S python:D
 android.accept_sdk_license = True
 
 p4a.branch = master
+# Pinned instead of floating on master's tip: your cached p4a checkout in
+# CI never auto-updates (buildozer only re-pulls when platform_update is
+# set, e.g. via `buildozer android update`), so it was stuck on an old
+# master commit whose venv bootstrap ran `pip install -U pip` mid-build --
+# that self-upgrade corrupts pip's own site-packages, causing
+# "ImportError: cannot import name 'BuildDependencyInstallError'".
+# Current master (7af1d13, 2026-08-09) already dropped that self-upgrade
+# step and carries the 3.14 remote-debugging patch this app needs, so
+# pin to it for a reproducible, working build.
+p4a.commit = 7af1d1325ef460def993cc7871c43d04bc877a94
 
 [buildozer]
 log_level = 2
