@@ -27,7 +27,16 @@ jobs:
             git zip unzip openjdk-17-jdk autoconf libtool pkg-config \
             zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 \
             cmake libffi-dev libssl-dev automake build-essential \
-            libltdl-dev
+            libltdl-dev ccache
+
+      - name: Cache ccache (speeds up repeat NDK compiles)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.ccache
+            ~/.cache/ccache
+          key: ccache-${{ hashFiles('buildozer.spec') }}
+          restore-keys: ccache-
 
       - name: Install Buildozer and Cython
         run: |
