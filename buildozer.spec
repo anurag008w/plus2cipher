@@ -36,7 +36,7 @@ android.api = 34
 android.minapi = 24
 android.ndk = 25b
 android.build_tools = 34.0.0
-android.archs = arm64-v8a,armeabi-v7a
+android.archs = arm64-v8a
 android.allow_backup = True
 android.logcat_filters = *:S python:D
 
@@ -62,5 +62,5 @@ p4a.commit = 7af1d1325ef460def993cc7871c43d04bc877a94
 p4a.local_recipes = ./p4a-recipes
 
 [buildozer]
-log_level = 2
+log_level = 1
 warn_on_root = 1

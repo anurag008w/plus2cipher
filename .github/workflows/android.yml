@@ -32,7 +32,9 @@ jobs:
       - name: Cache ccache (speeds up repeat NDK compiles)
         uses: actions/cache@v4
         with:
-          path: ~/.ccache
+          path: |
+            ~/.ccache
+            ~/.cache/ccache
           key: ccache-${{ hashFiles('buildozer.spec') }}
           restore-keys: ccache-
 
