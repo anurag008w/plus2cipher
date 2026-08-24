@@ -37,7 +37,7 @@ class LibThorVGRecipe(MesonRecipe):
         from pythonforandroid.logger import shprint
         
         # Manually download the tarball using curl to avoid urllib 404 / rate limit issues
-        dest_dir = self.ctx.packages_path
+        dest_dir = os.path.join(self.ctx.packages_path, self.name)
         filename = f"v{self.version}.tar.gz"
         dest_path = os.path.join(dest_dir, filename)
         
@@ -53,6 +53,11 @@ class LibThorVGRecipe(MesonRecipe):
                 fallback_url = f"https://codeload.github.com/thorvg/thorvg/tar.gz/refs/tags/v{self.version}"
                 print(f"Trying fallback URL: {fallback_url}")
                 shprint(sh.curl, "-L", "-o", dest_path, fallback_url)
+                
+            # Create p4a marker file so p4a doesn't delete it and retry
+            marker_path = os.path.join(dest_dir, f".mark-{filename}")
+            with open(marker_path, 'w') as f:
+                f.write('downloaded')
                 
         super().download()
 

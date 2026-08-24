@@ -2,7 +2,7 @@ from pythonforandroid.recipe import PythonRecipe
 
 class CharsetNormalizerRecipe(PythonRecipe):
     version = '3.5.1'
-    url = 'https://pypi.python.org/packages/source/c/charset-normalizer/charset-normalizer-{version}.tar.gz'
+    url = 'https://pypi.org/packages/source/c/charset-normalizer/charset_normalizer-{version}.tar.gz'
     depends = ['setuptools']
     
     def get_recipe_env(self, arch=None, with_flags_in_cc=True):
