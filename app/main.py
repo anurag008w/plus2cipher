@@ -64,6 +64,19 @@ def label_patched_init(self, **kwargs):
 
 Label.__init__ = label_patched_init
 
+from kivy.uix.textinput import TextInput
+original_ti_init = TextInput.__init__
+def ti_patched_init(self, **kwargs):
+    fs_str = _app_settings_proxy.get("font_size", "Medium")
+    scale = 0.85 if fs_str == "Small" else (1.2 if fs_str == "Large" else 1.0)
+    val = kwargs.get("font_size", 15)  # default is 15
+    if isinstance(val, (int, float)):
+        kwargs["font_size"] = original_sp(val * scale)
+    original_ti_init(self, **kwargs)
+
+TextInput.__init__ = ti_patched_init
+
+
 from app.ui.layouts.responsive import AppShell
 from app.ui.screens.splash import SplashScreen
 from app.ui.screens.home import HomeScreen
