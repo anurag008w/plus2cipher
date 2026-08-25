@@ -20,7 +20,7 @@ fullscreen = 0
 
 icon.filename = %(source.dir)s/assets/icons/icon_512.png
 presplash.filename = %(source.dir)s/assets/icons/blank.png
-presplash.color = #070A13
+android.presplash_color = #070A13
 
 # No network, no accounts, no analytics (spec section 53) -- so no
 # permissions beyond what the OS grants by default. Clipboard and the
