@@ -5,7 +5,7 @@ package.name = plus2cipher
 package.domain = com.example
 
 source.dir = .
-source.include_exts = py,png,jpg,jpeg,kv,atlas,json,ttf,mp4
+source.include_exts = py,png,jpg,jpeg,kv,atlas,json,ttf,mp4,zip
 source.exclude_dirs = tests,tests_manual,.github,.git,.venv,venv,bin,__pycache__
 source.exclude_patterns = assets/icons/app_icon_source.png,assets/icons/icon_master.png,*.pyc,*.pyo,*.spec.bak
 
