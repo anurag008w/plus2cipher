@@ -17,6 +17,7 @@ from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.metrics import dp
 import os
+import webbrowser
 
 from ..components.behaviors import ThemedBehavior
 from ..components.heading import ScreenHeading
@@ -52,7 +53,8 @@ class _InfoSection(Card):
             self._body_label.color = self.theme.color("text_secondary")
 
 
-class _LinkRow(Card):
+from kivy.uix.behaviors import ButtonBehavior
+class _LinkRow(ButtonBehavior, Card):
     def __init__(self, icon: str, title: str, subtitle: str, on_press=None, **kwargs):
         super().__init__(**kwargs)
         self.orientation = "horizontal"
@@ -75,6 +77,8 @@ class _LinkRow(Card):
         text_box.add_widget(self._subtitle_label)
         self._chevron = Label(text=icon_char("chevron_right"), font_name=ICON_FONT, font_size=16,
                                size_hint_x=None, width=dp(20))
+        if on_press:
+            self.bind(on_release=on_press)
 
         self.add_widget(self._icon_label)
         self.add_widget(text_box)
@@ -140,9 +144,9 @@ class AboutScreen(ThemedBehavior, Screen):
             "accent themes, and full desktop + Android support.",
         ))
 
-        outer.add_widget(_LinkRow("github", "GitHub Repository", "View or contribute to the source"))
-        outer.add_widget(_LinkRow("share", "Support / Feedback", "Report an issue or suggest an idea"))
-        outer.add_widget(_LinkRow("check", "Licenses", "Open-source components used by this app"))
+        outer.add_widget(_LinkRow("github", "GitHub Repository", "View or contribute to the source", on_press=lambda *a: webbrowser.open("https://github.com/anurag008w/plus2cipher")))
+        outer.add_widget(_LinkRow("share", "Support / Feedback", "Report an issue or suggest an idea", on_press=lambda *a: webbrowser.open("https://github.com/anurag008w/plus2cipher/issues")))
+        outer.add_widget(_LinkRow("check", "Licenses", "Open-source components used by this app", on_press=lambda *a: webbrowser.open("https://kivy.org")))
 
         scroll = ScrollView(do_scroll_x=False)
         scroll.add_widget(outer)
