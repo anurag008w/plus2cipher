@@ -10,14 +10,14 @@ import os
 
 from kivy.uix.screenmanager import Screen
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.video import Video
+from kivy.uix.image import Image
 from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
 
 from ..components.behaviors import ThemedBehavior
 from ..asset_paths import PROJECT_ROOT
 
-_VIDEO_PATH = os.path.join(PROJECT_ROOT, "assets", "splash_video.mp4")
+_ANIM_PATH = os.path.join(PROJECT_ROOT, "assets", "splash_anim.zip")
 
 
 class SplashScreen(ThemedBehavior, Screen):
@@ -31,11 +31,10 @@ class SplashScreen(ThemedBehavior, Screen):
             self._bg = Rectangle(pos=self._root.pos, size=self._root.size)
         self._root.bind(pos=self._sync_bg, size=self._sync_bg)
 
-        self._video = None
-        if os.path.exists(_VIDEO_PATH):
-            self._video = Video(source=_VIDEO_PATH, state='play', options={'eos': 'stop'})
-            self._video.bind(eos=self._on_video_eos)
-            self._root.add_widget(self._video)
+        self._anim = None
+        if os.path.exists(_ANIM_PATH):
+            self._anim = Image(source=_ANIM_PATH, anim_delay=1/24.0, allow_stretch=True, keep_ratio=False)
+            self._root.add_widget(self._anim)
         
         self.add_widget(self._root)
 
@@ -49,21 +48,16 @@ class SplashScreen(ThemedBehavior, Screen):
         self._bg_color.rgba = self.theme.color("background")
 
     def on_enter(self, *args):
-        if not self._video:
-            # Fallback if video doesn't exist
+        if not self._anim:
             Clock.schedule_once(self._finish, 1.0)
         else:
-            # Fallback timeout to ensure app starts even if video fails to play/end
-            Clock.schedule_once(self._finish, 6.0)
-
-    def _on_video_eos(self, *args):
-        self._finish()
+            Clock.schedule_once(self._finish, 5.2)  # Video duration
 
     def _finish(self, *_):
         if getattr(self, '_finished', False):
             return
         self._finished = True
-        if self._video:
-            self._video.state = 'stop'
-        if self._on_finished:
+        if getattr(self, '_anim', None):
+            self._anim.anim_delay = -1  # Stop animation
+        if getattr(self, '_on_finished', None):
             self._on_finished()
