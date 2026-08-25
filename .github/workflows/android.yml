@@ -92,7 +92,7 @@ jobs:
             adb shell monkey -p com.example.plus2cipher -c android.intent.category.LAUNCHER 1
             
             # Wait 10 seconds for the splash screen to finish and home screen to load
-            sleep 10
+            sleep 45
             
             # Take screenshot of home screen
             adb exec-out screencap -p > android_home.png
