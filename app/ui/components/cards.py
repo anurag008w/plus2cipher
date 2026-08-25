@@ -31,6 +31,8 @@ class Card(ThemedBehavior, BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.orientation = "vertical"
+        self.size_hint_y = None
+        self.height = dp(96)
         with self.canvas.before:
             self._bg_color = Color(0, 0, 0, 0)
             self._bg = RoundedRectangle(pos=self.pos, size=self.size)
@@ -254,6 +256,8 @@ class StatCard(ThemedBehavior, BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.orientation = "vertical"
+        self.size_hint_y = None
+        self.height = dp(96)
         with self.canvas.before:
             self._bg_color = Color(0, 0, 0, 0)
             self._bg = RoundedRectangle(pos=self.pos, size=self.size)
