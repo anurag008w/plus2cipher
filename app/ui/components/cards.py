@@ -71,7 +71,7 @@ class EyebrowRow(ThemedBehavior, BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.size_hint_y = None
-        self.height = dp(20)
+        self.height = dp(32)
         self._title_label = Label(
             text=self.title, bold=True, halign="left", valign="middle", font_size=12
         )
