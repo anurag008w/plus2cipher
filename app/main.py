@@ -94,6 +94,8 @@ class Plus2CipherApp(App):
     title = "+2 Cipher"
 
     def build(self):
+        from kivy.core.window import Window
+        Window.softinput_mode = "below_target"
         data_dir = self._resolve_data_dir()
         self.settings = Settings.load(os.path.join(data_dir, "settings.json"))
 
