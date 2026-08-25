@@ -80,7 +80,13 @@ original_ti_touch_down = TextInput.on_touch_down
 def ti_patched_touch_down(self, touch):
     if self.collide_point(*touch.pos):
         from kivy.clock import Clock
-        Clock.schedule_once(lambda dt: setattr(self, 'focus', True), 0.1)
+        # Delay focus request so all touch_up events finish processing first.
+        # On Android a quick tap fires touch_up very fast which can dismiss the
+        # keyboard if we request it in the same event cycle. Two scheduled
+        # requests 200ms apart ensure the keyboard sticks even if the first
+        # gets cancelled by a lingering touch event.
+        Clock.schedule_once(lambda dt: setattr(self, 'focus', True), 0.3)
+        Clock.schedule_once(lambda dt: setattr(self, 'focus', True) if not self.focus else None, 0.5)
     return original_ti_touch_down(self, touch)
 TextInput.on_touch_down = ti_patched_touch_down
 
