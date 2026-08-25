@@ -135,7 +135,7 @@ class HistoryStore:
             rows = conn.execute(sql, params).fetchall()
         return [ConversionRecord.from_row(r) for r in rows]
 
-    def list_favorites(self, query: str = "") -> List[ConversionRecord]:
+    def list_favorites(self, query: str = "", limit: int = 50) -> List[ConversionRecord]:
         sql = (
             "SELECT id, timestamp, mode, input_text, output_text, is_favorite "
             "FROM history WHERE is_favorite = 1"
@@ -145,7 +145,8 @@ class HistoryStore:
             sql += " AND (input_text LIKE ? OR output_text LIKE ?)"
             like = f"%{query}%"
             params = (like, like)
-        sql += " ORDER BY id DESC"
+        sql += " ORDER BY id DESC LIMIT ?"
+        params = (*params, limit)
         with self._connect() as conn:
             rows = conn.execute(sql, params).fetchall()
         return [ConversionRecord.from_row(r) for r in rows]
