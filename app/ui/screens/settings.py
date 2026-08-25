@@ -71,52 +71,52 @@ class SettingsScreen(ThemedBehavior, Screen):
         s = self.settings
         section = SettingSection("Appearance")
 
-        theme_ctrl = SegmentedControl(
+        self.theme_ctrl = SegmentedControl(
             options=[("dark", "Dark"), ("light", "Light"), ("system", "System")],
-            selected=s.theme, on_change=self._on_theme_changed,
+            selected=s.theme, on_change=self._on_theme_selection_changed,
         )
-        theme_ctrl.size_hint_x = None
-        theme_ctrl.width = dp(220)
-        section.add_row(SettingRow("Theme", "Dark, light, or match your system", theme_ctrl))
+        self.theme_ctrl.size_hint_x = None
+        self.theme_ctrl.width = dp(220)
+        section.add_row(SettingRow("Theme", "Dark, light, or match your system", self.theme_ctrl))
 
         accent_ctrl = ColorSelector(selected=s.accent, on_select=self._on_accent_changed)
         section.add_row(SettingRow("Accent color", "Applied to buttons, tabs, and highlights", accent_ctrl))
 
-        density_ctrl = SegmentedControl(
+        self.density_ctrl = SegmentedControl(
             options=[("comfortable", "Comfortable"), ("compact", "Compact")],
             selected=s.get("density"), on_change=lambda v: self._set_and_apply("density", v),
         )
-        density_ctrl.size_hint_x = None
-        density_ctrl.width = dp(200)
-        section.add_row(SettingRow("UI density", "Spacing between elements", density_ctrl))
+        self.density_ctrl.size_hint_x = None
+        self.density_ctrl.width = dp(200)
+        section.add_row(SettingRow("UI density", "Spacing between elements", self.density_ctrl))
 
-        font_ctrl = SegmentedControl(
+        self.font_ctrl = SegmentedControl(
             options=[("small", "Small"), ("medium", "Medium"), ("large", "Large")],
             selected=s.get("font_size"), on_change=lambda v: self._set_and_apply("font_size", v),
         )
-        font_ctrl.size_hint_x = None
-        font_ctrl.width = dp(200)
-        section.add_row(SettingRow("Font size", "Text size across the app", font_ctrl))
+        self.font_ctrl.size_hint_x = None
+        self.font_ctrl.width = dp(200)
+        section.add_row(SettingRow("Font size", "Text size across the app", self.font_ctrl))
 
-        radius_ctrl = SegmentedControl(
+        self.radius_ctrl = SegmentedControl(
             options=[("subtle", "Subtle"), ("standard", "Standard"), ("large", "Large")],
             selected=s.get("radius"), on_change=lambda v: self._set_and_apply("radius", v),
         )
-        radius_ctrl.size_hint_x = None
-        radius_ctrl.width = dp(200)
-        section.add_row(SettingRow("Rounded corners", "Card and button corner radius", radius_ctrl))
+        self.radius_ctrl.size_hint_x = None
+        self.radius_ctrl.width = dp(200)
+        section.add_row(SettingRow("Rounded corners", "Card and button corner radius", self.radius_ctrl))
 
         section.add_row(SettingRow("Animations", "Interface motion and transitions",
                                     _themed_switch(s.get("animations"), lambda v: self._set_and_apply("animations", v))))
-        section.add_row(SettingRow("Reduced motion", "Minimize animation for accessibility",
-                                    _themed_switch(s.get("reduced_motion"), lambda v: self._set_and_apply("reduced_motion", v))))
+        self.reduced_motion_switch = _themed_switch(s.get("reduced_motion"), lambda v: self._set_and_apply("reduced_motion", v))
+        section.add_row(SettingRow("Reduced motion", "Minimize animation for accessibility", self.reduced_motion_switch))
         return section
 
     def _build_behavior_section(self):
         s = self.settings
         section = SettingSection("Behavior")
-        section.add_row(SettingRow("Live transformation", "Update output while you type",
-                                    _themed_switch(s.live_transformation, self._on_live_transform_changed)))
+        self.live_transform_switch = _themed_switch(s.live_transformation, self._on_live_transform_changed)
+        section.add_row(SettingRow("Live transformation", "Update output while you type", self.live_transform_switch))
         section.add_row(SettingRow("Auto-save history", "Save every conversion automatically",
                                     _themed_switch(s.get("auto_save_history"), lambda v: self._set_and_apply("auto_save_history", v))))
         section.add_row(SettingRow("Auto-focus input", "Focus the input box on Home automatically",
@@ -138,8 +138,8 @@ class SettingsScreen(ThemedBehavior, Screen):
         section.add_row(SettingRow("Current shift", "The built-in +2 Cipher behavior", label))
 
         limit_values = ["1000", "2500", "5000", "10000", "25000"]
-        limit_ctrl = _themed_spinner(str(s.char_limit), limit_values, self._on_char_limit_changed)
-        section.add_row(SettingRow("Character limit", "Maximum length per conversion", limit_ctrl))
+        self.char_limit_ctrl = _themed_spinner(str(s.char_limit), limit_values, self._on_char_limit_changed)
+        section.add_row(SettingRow("Character limit", "Maximum length per conversion", self.char_limit_ctrl))
         return section
 
     def _build_history_section(self):
@@ -147,8 +147,8 @@ class SettingsScreen(ThemedBehavior, Screen):
         section = SettingSection("History")
         limit_values = ["50", "100", "250", "500", "1000", "Unlimited"]
         current = "Unlimited" if s.history_limit == 0 else str(s.history_limit)
-        limit_ctrl = _themed_spinner(current, limit_values, self._on_history_limit_changed)
-        section.add_row(SettingRow("History limit", "Oldest non-favorite entries are trimmed first", limit_ctrl))
+        self.history_limit_ctrl = _themed_spinner(current, limit_values, self._on_history_limit_changed)
+        section.add_row(SettingRow("History limit", "Oldest non-favorite entries are trimmed first", self.history_limit_ctrl))
 
         export_btn = SecondaryButton(text="Export", icon="export")
         export_btn.size_hint_x = None
@@ -166,8 +166,8 @@ class SettingsScreen(ThemedBehavior, Screen):
     def _build_accessibility_section(self):
         s = self.settings
         section = SettingSection("Accessibility")
-        section.add_row(SettingRow("High contrast", "Increase text and border contrast",
-                                    _themed_switch(s.get("high_contrast"), lambda v: self._set_and_apply("high_contrast", v))))
+        self.high_contrast_switch = _themed_switch(s.get("high_contrast"), lambda v: self._set_and_apply("high_contrast", v))
+        section.add_row(SettingRow("High contrast", "Increase text and border contrast", self.high_contrast_switch))
         note = Label(text="Font scaling, focus states, and keyboard navigation\nare on throughout the app.",
                      font_size=11.5, size_hint=(None, None), size=(dp(260), dp(32)), halign="right")
         note.bind(size=lambda w, *_: setattr(w, "text_size", w.size))
@@ -225,7 +225,7 @@ class SettingsScreen(ThemedBehavior, Screen):
         if self.theme_ref:
             self.theme_ref.dispatch("on_change")
 
-    def _on_theme_changed(self, value):
+    def _on_theme_selection_changed(self, value):
         if self.theme_ref:
             self.theme_ref.set_theme(value)
 
@@ -315,4 +315,24 @@ class SettingsScreen(ThemedBehavior, Screen):
             self.manager.current = "about"
 
     def apply_theme(self):
-        pass
+        s = self.settings
+        
+        # Sync UI state to settings
+        if hasattr(self, 'theme_ctrl'): self.theme_ctrl.selected = s.theme
+        if hasattr(self, 'density_ctrl'): self.density_ctrl.selected = s.get("density")
+        if hasattr(self, 'font_ctrl'): self.font_ctrl.selected = s.get("font_size")
+        if hasattr(self, 'radius_ctrl'): self.radius_ctrl.selected = s.get("radius")
+        
+        if hasattr(self, 'anim_switch'): self.anim_switch.active = not s.get("reduced_motion")
+        if hasattr(self, 'reduced_motion_switch'): self.reduced_motion_switch.active = s.get("reduced_motion")
+        if hasattr(self, 'live_transform_switch'): self.live_transform_switch.active = s.live_transformation
+        if hasattr(self, 'auto_save_switch'): self.auto_save_switch.active = s.get("auto_save")
+        if hasattr(self, 'confirm_clear_switch'): self.confirm_clear_switch.active = s.get("confirm_before_clear")
+        if hasattr(self, 'clear_after_switch'): self.clear_after_switch.active = s.get("clear_after_copy")
+        if hasattr(self, 'high_contrast_switch'): self.high_contrast_switch.active = s.get("high_contrast")
+        
+        if hasattr(self, 'history_limit_ctrl'):
+            self.history_limit_ctrl.text = "Unlimited" if s.history_limit == 0 else str(s.history_limit)
+        if hasattr(self, 'char_limit_ctrl'):
+            self.char_limit_ctrl.text = str(s.char_limit)
+
