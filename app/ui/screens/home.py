@@ -169,10 +169,19 @@ class HomeScreen(ThemedBehavior, Screen):
         result = cipher.apply_mode(text, mode, self.settings.shift)
         self.output_card.set_text(result)
         if text and self.settings.get("auto_save_history", True):
-            record = self.history_store.add(mode, text, result)
-            self.history_store.enforce_limit(self.settings.history_limit)
-            self._current_favorite_record_id = record.id
-            self.output_card.set_favorited(False)
+            if hasattr(self, "_history_ev") and self._history_ev:
+                self._history_ev.cancel()
+            from kivy.clock import Clock
+            self._history_ev = Clock.schedule_once(lambda dt: self._save_to_history(mode, text, result), 1.5)
+
+    def _save_to_history(self, mode, text, result):
+        recent = self.history_store.get_all()
+        if recent and recent[0].input_text == text and recent[0].mode == mode:
+            return
+        record = self.history_store.add(mode, text, result)
+        self.history_store.enforce_limit(self.settings.history_limit)
+        self._current_favorite_record_id = record.id
+        self.output_card.set_favorited(False)
 
     def set_live_transformation(self, is_live: bool):
         self.input_card.set_live_mode(is_live)
