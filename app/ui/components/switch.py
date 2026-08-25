@@ -70,7 +70,8 @@ class ThemedSwitch(ButtonBehavior, ThemedBehavior, Widget):
         self._refresh(animate=False)
 
 
-class _ThumbProxy:
+from kivy.event import EventDispatcher
+class _ThumbProxy(EventDispatcher):
     """Lets kivy.animation.Animation tween an Ellipse's `pos` like a widget's."""
 
     def __init__(self, ellipse):
