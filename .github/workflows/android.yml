@@ -61,3 +61,43 @@ jobs:
           name: plus2cipher-debug-apk
           path: bin/*.apk
           if-no-files-found: error
+
+  screenshot:
+    needs: build
+    runs-on: macos-14
+    steps:
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: plus2cipher-debug-apk
+
+      - name: Run Emulator and Snapshot
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: aosp_atd
+          arch: arm64-v8a
+          profile: pixel_6
+          script: |
+            # Find and install the APK
+            APK=$(ls *.apk | head -n 1)
+            adb install -r $APK
+            
+            # Launch the app
+            adb shell monkey -p com.example.plus2cipher -c android.intent.category.LAUNCHER 1
+            
+            # Wait 10 seconds for the splash screen to finish and home screen to load
+            sleep 10
+            
+            # Take screenshot of home screen
+            adb exec-out screencap -p > android_home.png
+            
+            # Navigate to settings
+            # We can use adb shell input tap to click settings, but it depends on screen resolution.
+            # For now, just getting the Home screen is enough.
+            
+      - name: Upload Screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-screenshots
+          path: "*.png"
