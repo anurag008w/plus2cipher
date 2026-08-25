@@ -175,7 +175,7 @@ class HomeScreen(ThemedBehavior, Screen):
             self._history_ev = Clock.schedule_once(lambda dt: self._save_to_history(mode, text, result), 1.5)
 
     def _save_to_history(self, mode, text, result):
-        recent = self.history_store.get_all()
+        recent = self.history_store.list_history(limit=1)
         if recent and recent[0].input_text == text and recent[0].mode == mode:
             return
         record = self.history_store.add(mode, text, result)
