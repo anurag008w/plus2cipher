@@ -39,7 +39,7 @@ class HomeScreen(ThemedBehavior, Screen):
         super().__init__(**kwargs)
         self.name = "home"
 
-        scroll = ScrollView(do_scroll_x=False, scroll_timeout=20, scroll_distance=10)
+        scroll = ScrollView(do_scroll_x=False)
         root = BoxLayout(orientation="vertical", size_hint_y=None, padding=dp(20), spacing=dp(16))
         root.bind(minimum_height=lambda w, *_: setattr(w, "height", w.minimum_height))
         self._root = root
