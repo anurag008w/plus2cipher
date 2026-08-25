@@ -65,8 +65,11 @@ class TestApp(Plus2CipherApp):
 
     def _shoot(self, name):
         from kivy.core.window import Window
-
-        Window.screenshot(name=os.path.join(SHOT_DIR, f"{name}.png"))
+        import shutil
+        target = os.path.join(SHOT_DIR, f"{name}.png")
+        filename = Window.screenshot(name=target)
+        if filename and os.path.exists(filename) and filename != target:
+            shutil.move(filename, target)
 
     def _type_and_shoot(self):
         self.home_screen.input_card.text_input.text = "Hello, World! 123"
