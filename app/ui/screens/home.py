@@ -123,7 +123,7 @@ class HomeScreen(ThemedBehavior, Screen):
     # -- responsive workspace layout ------------------------------------------------
 
     def _on_window_resize(self, window, size):
-        stacked = size[0] < BREAKPOINT_MOBILE_MAX + 100  # a little headroom over the raw mobile cutoff
+        stacked = (size[0] / dp(1)) < BREAKPOINT_MOBILE_MAX + 100  # a little headroom over the raw mobile cutoff
         if stacked == self._layout_is_stacked:
             return
         self._layout_is_stacked = stacked
