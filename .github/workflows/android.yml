@@ -86,8 +86,7 @@ jobs:
           profile: pixel_6
           script: |
             # Find and install the APK
-            APK=$(ls *.apk | head -n 1)
-            adb install -r $APK
+            adb install -r *.apk
             
             # Launch the app
             adb shell monkey -p com.example.plus2cipher -c android.intent.category.LAUNCHER 1
