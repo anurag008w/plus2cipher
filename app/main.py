@@ -35,6 +35,35 @@ from app.core.storage import HistoryStore
 from app.ui.theme.manager import ThemeManager
 from app.ui.theme import palettes
 from app.ui.components.snackbar import SnackbarHost
+
+import kivy.metrics
+from kivy.uix.label import Label
+
+original_dp = kivy.metrics.dp
+original_sp = kivy.metrics.sp
+_app_settings_proxy = {"density": "Comfortable", "font_size": "Medium"}
+
+def dp_patched(val):
+    if isinstance(val, str) and val.endswith('dp'):
+        val = float(val[:-2])
+    d = _app_settings_proxy.get("density", "Comfortable")
+    scale = 0.85 if d == "Compact" else (1.2 if d == "Spacious" else 1.0)
+    return original_dp(val * scale)
+
+kivy.metrics.dp = dp_patched
+
+original_label_init = Label.__init__
+def label_patched_init(self, **kwargs):
+    fs_str = _app_settings_proxy.get("font_size", "Medium")
+    scale = 0.85 if fs_str == "Small" else (1.2 if fs_str == "Large" else 1.0)
+    if "font_size" in kwargs:
+        val = kwargs["font_size"]
+        if isinstance(val, (int, float)):
+            kwargs["font_size"] = original_sp(val * scale)
+    original_label_init(self, **kwargs)
+
+Label.__init__ = label_patched_init
+
 from app.ui.layouts.responsive import AppShell
 from app.ui.screens.splash import SplashScreen
 from app.ui.screens.home import HomeScreen
@@ -55,34 +84,9 @@ class Plus2CipherApp(App):
         data_dir = self._resolve_data_dir()
         self.settings = Settings.load(os.path.join(data_dir, "settings.json"))
 
-        global _app_settings
-        _app_settings = self.settings
-
-        import kivy.metrics
-        original_dp = kivy.metrics.dp
-
-        def dp_patched(val):
-            d = _app_settings.get("density", "comfortable")
-            scale = 0.85 if d == "compact" else 1.0
-            return original_dp(val * scale)
-
-        kivy.metrics.dp = dp_patched
-
-        from kivy.uix.label import Label
-        original_init = Label.__init__
-
-        def label_init(self, **kwargs):
-            fs_str = _app_settings.get("font_size", "medium")
-            scale = 0.9 if fs_str == "small" else (1.15 if fs_str == "large" else 1.0)
-            
-            if "font_size" in kwargs:
-                val = kwargs["font_size"]
-                if isinstance(val, (int, float)):
-                    kwargs["font_size"] = val * scale
-            
-            original_init(self, **kwargs)
-
-        Label.__init__ = label_init
+        global _app_settings_proxy
+        _app_settings_proxy["density"] = self.settings.get("density")
+        _app_settings_proxy["font_size"] = self.settings.get("font_size")
 
         self.history_store = HistoryStore(os.path.join(data_dir, "history.db"))
         self.theme = ThemeManager(self.settings)
