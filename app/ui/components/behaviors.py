@@ -48,9 +48,19 @@ class HoverBehavior:
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         Window.bind(mouse_pos=self._on_mouse_pos)
+        self.bind(parent=self._on_parent_changed)
+
+    def _on_parent_changed(self, *_):
+        if not self.get_root_window():
+            if self.hovered:
+                self.hovered = False
+                self.on_leave()
 
     def _on_mouse_pos(self, window, pos):
         if not self.get_root_window():
+            if self.hovered:
+                self.hovered = False
+                self.on_leave()
             return
         inside = self.collide_point(*self.to_widget(*pos))
         if inside != self.hovered:
