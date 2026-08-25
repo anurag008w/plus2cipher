@@ -20,6 +20,14 @@ from .behaviors import HoverBehavior
 
 _HOVER_DELAY = 0.45
 
+# On Android there is no mouse/hover — tooltips must be fully disabled
+# because touch-up events never trigger on_leave, causing ghost tooltips.
+try:
+    from android import mActivity  # noqa: F401
+    _IS_ANDROID = True
+except Exception:
+    _IS_ANDROID = False
+
 
 class _TooltipLabel(Label):
     def __init__(self, text, **kwargs):
@@ -52,7 +60,8 @@ class TooltipBehavior(HoverBehavior):
         super().__init__(**kwargs)
 
     def on_enter(self):
-        if not self.tooltip_text:
+        # Android has no hover — never show tooltips there
+        if _IS_ANDROID or not self.tooltip_text:
             return
         self._tooltip_event = Clock.schedule_once(self._show_tooltip, _HOVER_DELAY)
 
@@ -61,6 +70,14 @@ class TooltipBehavior(HoverBehavior):
             self._tooltip_event.cancel()
             self._tooltip_event = None
         self._hide_tooltip()
+
+    def on_touch_up(self, touch):
+        # Always hide tooltip on any touch release (safety net for mobile/desktop)
+        self._hide_tooltip()
+        if self._tooltip_event:
+            self._tooltip_event.cancel()
+            self._tooltip_event = None
+        return super().on_touch_up(touch)
 
     def _show_tooltip(self, *_):
         if not self.get_root_window():
@@ -78,3 +95,4 @@ class TooltipBehavior(HoverBehavior):
             except Exception:
                 pass
             self._tooltip_widget = None
+
