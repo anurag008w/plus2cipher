@@ -130,6 +130,7 @@ class SecondaryButton(_BaseButton):
     """Card-colored with a subtle border. Use for secondary actions (Paste, Clear...)."""
 
     def __init__(self, **kwargs):
+        kwargs.setdefault("size_hint_x", 1)
         super().__init__(**kwargs)
         with self.canvas.before:
             self._border_color = Color(1, 1, 1, 0.1)
