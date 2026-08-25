@@ -28,7 +28,7 @@ class SettingSection(ThemedBehavior, BoxLayout):
         self.padding = (0, dp(4))
 
         self._title_label = Label(text=title.upper(), bold=True, font_size=12,
-                                   halign="left", size_hint_y=None, height=dp(28))
+                                   halign="left", size_hint_y=1)
         self._title_label.bind(size=lambda w, *_: setattr(w, "text_size", w.size))
         self.add_widget(self._title_label)
 
@@ -63,7 +63,7 @@ class SettingRow(ThemedBehavior, BoxLayout):
         super().__init__(**kwargs)
         self.orientation = "horizontal"
         self.size_hint_y = None
-        self.height = dp(56) if description else dp(48)
+        self.height = dp(72) if description else dp(56)
         self.padding = (dp(16), dp(8))
         self.spacing = dp(12)
 
@@ -74,9 +74,9 @@ class SettingRow(ThemedBehavior, BoxLayout):
 
         text_box = BoxLayout(orientation="vertical")
         self._label_widget = Label(text=label, font_size=14, halign="left", valign="middle",
-                                    size_hint_y=None, height=dp(20))
+                                    size_hint_y=1)
         self._desc_widget = Label(text=description, font_size=11.5, halign="left", valign="top",
-                                   size_hint_y=None, height=dp(16) if description else 0)
+                                   size_hint_y=0.8 if description else 0)
         for w in (self._label_widget, self._desc_widget):
             w.bind(size=lambda widget, *_: setattr(widget, "text_size", widget.size))
         text_box.add_widget(self._label_widget)
