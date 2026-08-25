@@ -80,7 +80,7 @@ original_ti_touch_down = TextInput.on_touch_down
 def ti_patched_touch_down(self, touch):
     if self.collide_point(*touch.pos):
         from kivy.clock import Clock
-        Clock.schedule_once(lambda dt: self._show_keyboard(), 0.1)
+        Clock.schedule_once(lambda dt: self.show_keyboard(), 0.1)
     return original_ti_touch_down(self, touch)
 TextInput.on_touch_down = ti_patched_touch_down
 
