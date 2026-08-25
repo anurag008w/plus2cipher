@@ -12,6 +12,7 @@ from __future__ import annotations
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.core.window import Window
 from kivy.metrics import dp
 from kivy.clock import Clock
@@ -101,7 +102,9 @@ class HomeScreen(ThemedBehavior, Screen):
         self._center_row_mobile.add_widget(self._center_swap_btn_mobile)
         self._center_row_mobile.add_widget(BoxLayout())
 
-        stats_row = BoxLayout(size_hint_y=None, height=dp(76), spacing=dp(12))
+        stats_row = GridLayout(cols=4, size_hint_y=None, spacing=dp(12))
+        stats_row.bind(minimum_height=lambda w, *_: setattr(w, "height", w.minimum_height))
+        self._stats_row = stats_row
         self.mode_stat = StatCard(label="MODE", value=_MODE_LABELS[self.segmented.selected])
         self.shift_stat = StatCard(label="SHIFT", value=f"+{settings.shift} / -{settings.shift}")
         self.preserve_stat = StatCard(label="PRESERVE", value="Letters, spaces, numbers, symbols")
@@ -129,6 +132,7 @@ class HomeScreen(ThemedBehavior, Screen):
         self._layout_is_stacked = stacked
         self._workspace.clear_widgets()
         self._workspace.orientation = "vertical" if stacked else "horizontal"
+        self._stats_row.cols = 2 if stacked else 4
         if stacked:
             self.input_card.size_hint_x = 1
             self.output_card.size_hint_x = 1
