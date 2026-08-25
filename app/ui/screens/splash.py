@@ -249,7 +249,7 @@ class SplashScreen(ThemedBehavior, Screen):
 
         root = FloatLayout()
         with root.canvas.before:
-            self._bg_color = Color(0, 0, 0, 1)
+            self._bg_color = Color(0.027, 0.039, 0.074, 1)
             self._bg = Rectangle(pos=root.pos, size=root.size)
         root.bind(pos=self._sync_bg, size=self._sync_bg)
         self._root = root
