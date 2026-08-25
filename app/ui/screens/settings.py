@@ -333,6 +333,12 @@ class SettingsScreen(ThemedBehavior, Screen):
         
         if hasattr(self, 'history_limit_ctrl'):
             self.history_limit_ctrl.text = "Unlimited" if s.history_limit == 0 else str(s.history_limit)
+            if self.theme:
+                self.history_limit_ctrl.background_color = self.theme.color("control_inactive")
+                self.history_limit_ctrl.color = self.theme.color("text_primary")
         if hasattr(self, 'char_limit_ctrl'):
             self.char_limit_ctrl.text = str(s.char_limit)
+            if self.theme:
+                self.char_limit_ctrl.background_color = self.theme.color("control_inactive")
+                self.char_limit_ctrl.color = self.theme.color("text_primary")
 
