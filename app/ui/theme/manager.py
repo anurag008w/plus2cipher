@@ -95,3 +95,18 @@ class ThemeManager(EventDispatcher):
     def on_change(self, *args):
         """Default no-op required by Kivy's EventDispatcher for custom events."""
         pass
+
+    @property
+    def scale_font(self) -> float:
+        return tokens._FONT_SCALE.get(self.settings.get("font_size", "medium"), 1.0)
+
+    @property
+    def scale_spacing(self) -> float:
+        return 0.75 if self.settings.get("density", "comfortable") == "compact" else 1.0
+
+    @property
+    def scale_radius(self) -> float:
+        r = self.settings.get("radius", "standard")
+        if r == "subtle": return 0.6
+        if r == "large": return 1.4
+        return 1.0
