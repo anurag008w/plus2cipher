@@ -53,7 +53,7 @@ class FavoritesScreen(ThemedBehavior, Screen):
 
     def refresh(self):
         self._list.clear_widgets()
-        records = self.history_store.list_favorites(query=self._query)
+        records = self.history_store.list_favorites(query=self._query, limit=50)
         if not records:
             if self._query:
                 empty = EmptyState("empty_search", "No matching favorites", "Try a different search term.")

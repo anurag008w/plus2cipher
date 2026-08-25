@@ -106,7 +106,7 @@ class HistoryScreen(ThemedBehavior, Screen):
 
     def refresh(self):
         self._list.clear_widgets()
-        records = self.history_store.list_history(query=self._query, limit=self.settings.history_limit or 100000)
+        records = self.history_store.list_history(query=self._query, limit=50)
         if not records:
             if self._query:
                 empty = EmptyState("empty_search", "No matching history", "Try a different search term.")
