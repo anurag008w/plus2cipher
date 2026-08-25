@@ -50,9 +50,9 @@ class AppShell(ThemedBehavior, FloatLayout):
         self.bottom_nav.set_active(route)
 
     def _on_resize(self, window, size):
-        # Window width in Kivy's own px units tracks dp closely enough at
-        # the baseline 96dpi used throughout this project's breakpoints.
-        width_dp = size[0]
+        # Convert physical pixels to density-independent pixels (dp)
+        # On Android, physical width can easily exceed 1000px, but dp width is smaller.
+        width_dp = size[0] / dp(1)
         cls = layout_class(width_dp)
         is_mobile = cls == "mobile"
         target = "mobile" if is_mobile else "desktop"

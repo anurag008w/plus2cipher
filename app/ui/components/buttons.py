@@ -17,6 +17,7 @@ from kivy.uix.behaviors import ButtonBehavior, FocusBehavior
 from kivy.graphics import Color, RoundedRectangle, Line
 from kivy.properties import StringProperty, BooleanProperty, NumericProperty
 from kivy.animation import Animation
+from kivy.metrics import dp
 
 from .behaviors import ThemedBehavior
 from .tooltip import TooltipBehavior
@@ -27,14 +28,14 @@ class _BaseButton(ThemedBehavior, TooltipBehavior, FocusBehavior, ButtonBehavior
     text = StringProperty("")
     icon = StringProperty("")  # semantic icon name, see components/icons.py
     disabled_look = BooleanProperty(False)
-    corner_radius = NumericProperty(10)
+    corner_radius = NumericProperty(dp(10))
 
     def __init__(self, **kwargs):
-        self._bg_color = [0, 0, 0, 0]
         super().__init__(**kwargs)
+        self._bg_color = [0, 0, 0, 0]
         self.orientation = "horizontal"
-        self.spacing = 8
-        self.padding = (16, 10)
+        self.spacing = dp(8)
+        self.padding = (dp(16), dp(10))
         with self.canvas.before:
             self._color_instr = Color(0, 0, 0, 0)
             self._bg = RoundedRectangle(pos=self.pos, size=self.size, radius=[self.corner_radius])
@@ -54,7 +55,7 @@ class _BaseButton(ThemedBehavior, TooltipBehavior, FocusBehavior, ButtonBehavior
                 font_name=ICON_FONT,
                 font_size=18,
                 size_hint=(None, 1),
-                width=22,
+                width=dp(22),
             )
             self.add_widget(self._icon_label)
         if self.text:
@@ -163,8 +164,8 @@ class IconButton(_BaseButton):
 
     def __init__(self, **kwargs):
         kwargs.setdefault("size_hint", (None, None))
-        kwargs.setdefault("size", (40, 40))
-        kwargs.setdefault("corner_radius", 10)
+        kwargs.setdefault("size", (dp(40), dp(40)))
+        kwargs.setdefault("corner_radius", dp(10))
         super().__init__(**kwargs)
         self.padding = (0, 0)
 
