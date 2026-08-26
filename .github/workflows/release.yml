@@ -39,8 +39,8 @@ jobs:
         run: |
           VERSION=${{ steps.get_version.outputs.version }}
 
-          # Find previous tag
-          PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${GITHUB_REF_NAME}$" | head -1)
+          # Find previous tag, ignoring the current one if it was already pushed
+          PREV_TAG=$(git tag --sort=-version:refname | grep -v "^v${VERSION}$" | head -1)
 
           if [ -z "$PREV_TAG" ]; then
             LOG=$(git log --pretty=format:"- %s" HEAD)
@@ -48,8 +48,8 @@ jobs:
             LOG=$(git log --pretty=format:"- %s" ${PREV_TAG}..HEAD)
           fi
 
-          # Filter out boring commits (merges, version bumps, etc.)
-          FILTERED=$(echo "$LOG" | grep -v "^- Merge " | grep -v "^- bump version" | grep -v "^- chore:" || true)
+          # Filter out boring commits
+          FILTERED=$(echo "$LOG" | grep -v "^- Merge " | grep -v "^- bump version" | grep -v "^- chore:" | grep -v "skip ci" || true)
 
           if [ -z "$FILTERED" ]; then
             FILTERED="- Maintenance and improvements"
@@ -64,7 +64,6 @@ jobs:
         run: |
           VERSION=${{ steps.get_version.outputs.version }}
 
-          # Prepend new entry before existing content (after first line "# Changelog")
           HEADER=$(head -3 CHANGELOG.md)
           REST=$(tail -n +4 CHANGELOG.md)
 
@@ -78,16 +77,21 @@ jobs:
 
           mv CHANGELOG.md.new CHANGELOG.md
 
-          # Also bump version in buildozer.spec
+          # Bump version in buildozer.spec
           sed -i "s/^version = .*/version = $VERSION/" buildozer.spec
 
-      - name: Commit updated CHANGELOG.md + buildozer.spec
+      - name: Commit updated files and tag
         run: |
+          VERSION=${{ steps.get_version.outputs.version }}
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md buildozer.spec
-          git diff --cached --quiet || git commit -m "chore: update CHANGELOG.md and version for ${{ github.ref_name }}"
+          git diff --cached --quiet || git commit -m "chore: release v$VERSION [skip ci]"
           git push origin HEAD:main
+          
+          # Force create the tag on this new commit so GitHub Releases can use it
+          git tag -f "v$VERSION"
+          git push -f origin "v$VERSION"
 
   build-apk:
     needs: update-changelog
@@ -95,7 +99,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main  # use updated main (with changelog committed above)
+          ref: main
 
       - uses: actions/setup-java@v4
         with:
@@ -148,9 +152,10 @@ jobs:
           path: bin/*.apk
           if-no-files-found: error
 
-      - name: Create GitHub Release with APK
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: bin/*.apk
           body_path: CHANGELOG.md
           name: "v${{ needs.update-changelog.outputs.version }}"
+          tag_name: "v${{ needs.update-changelog.outputs.version }}"
