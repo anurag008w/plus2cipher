@@ -9,7 +9,7 @@ source.include_exts = py,png,jpg,jpeg,kv,atlas,json,ttf,mp4,zip
 source.exclude_dirs = tests,tests_manual,.github,.git,.venv,venv,bin,__pycache__
 source.exclude_patterns = assets/icons/app_icon_source.png,assets/icons/icon_master.png,*.pyc,*.pyo,*.spec.bak
 
-version = 1.0.0
+version = 1.1.0
 
 requirements = python3,kivy==2.3.1,plyer==2.1.0,charset_normalizer
 

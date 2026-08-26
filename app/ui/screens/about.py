@@ -26,7 +26,23 @@ from ..components.icons import icon_char, ICON_FONT
 from ..asset_paths import icon_path
 from ...core.cipher import preview_mapping
 
-APP_VERSION = "1.0.0"
+def _read_version() -> str:
+    """Read version from buildozer.spec so it never needs to be manually updated."""
+    try:
+        import os
+        spec_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "buildozer.spec")
+        spec_path = os.path.abspath(spec_path)
+        with open(spec_path) as f:
+            for line in f:
+                if line.startswith("version"):
+                    return line.split("=", 1)[1].strip()
+    except Exception:
+        pass
+    return "1.0.0"
+
+
+APP_VERSION = _read_version()
+
 
 _ICON_PATH = icon_path("icon_96.png")
 
@@ -140,7 +156,10 @@ class AboutScreen(ThemedBehavior, Screen):
 
         outer.add_widget(_InfoSection(
             "Changelog",
-            f"{APP_VERSION} — Initial release: encode/decode, history, favorites, "
+            "1.1.0 — Bug fixes: keyboard opens reliably on quick tap, ghost tooltips removed "
+            "on Android, history saves after typing pause (not every keystroke), fixed crash "
+            "on History/Favorites tab.\n\n"
+            "1.0.0 — Initial release: encode/decode, history, favorites, "
             "accent themes, and full desktop + Android support.",
         ))
 
