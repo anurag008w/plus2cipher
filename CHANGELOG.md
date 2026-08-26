@@ -9,6 +9,13 @@ All notable changes to +2 Cipher are documented here.
 - fix: change softinput_mode from pan to resize so keyboard doesn't push input card off screen
 
 
+## 1.2.0
+- fix: add workflow_dispatch trigger to release.yml so it can be manually triggered from GitHub UI
+- feat: auto changelog from git commits on release tag, dynamic version in About screen
+- feat: make APP_VERSION dynamic from buildozer.spec, bump to 1.1.0, update changelog
+- fix: change softinput_mode from pan to resize so keyboard doesn't push input card off screen
+
+
 ## 1.1.0
 - Fixed crash when opening History or Favorites tab
 - Fixed ghost tooltips getting stuck on Android after tapping Copy/Share/Star buttons
