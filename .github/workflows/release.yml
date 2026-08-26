@@ -1,24 +1,90 @@
 name: Release
 
-# Manual only, on purpose -- a "Release" is a real, versioned, public
-# artifact you publish deliberately, unlike the Android CI workflow (which
-# builds automatically on every push just to catch build breakage early).
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Version to release, e.g. 1.0.1 (no leading 'v')"
-        required: true
-        type: string
+  push:
+    tags:
+      - "v*"
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  update-changelog:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need full history for git log
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog entry from git commits
+        id: gen_changelog
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+
+          # Find previous tag
+          PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${GITHUB_REF_NAME}$" | head -1)
+
+          if [ -z "$PREV_TAG" ]; then
+            LOG=$(git log --pretty=format:"- %s" HEAD)
+          else
+            LOG=$(git log --pretty=format:"- %s" ${PREV_TAG}..HEAD)
+          fi
+
+          # Filter out boring commits (merges, version bumps, etc.)
+          FILTERED=$(echo "$LOG" | grep -v "^- Merge " | grep -v "^- bump version" | grep -v "^- chore:" || true)
+
+          if [ -z "$FILTERED" ]; then
+            FILTERED="- Maintenance and improvements"
+          fi
+
+          echo "NEW_ENTRY<<EOF" >> $GITHUB_ENV
+          echo "## $VERSION" >> $GITHUB_ENV
+          echo "$FILTERED" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Update CHANGELOG.md
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+
+          # Prepend new entry before existing content (after first line "# Changelog")
+          HEADER=$(head -3 CHANGELOG.md)
+          REST=$(tail -n +4 CHANGELOG.md)
+
+          {
+            echo "$HEADER"
+            echo ""
+            echo "$NEW_ENTRY"
+            echo ""
+            echo "$REST"
+          } > CHANGELOG.md.new
+
+          mv CHANGELOG.md.new CHANGELOG.md
+
+          # Also bump version in buildozer.spec
+          sed -i "s/^version = .*/version = $VERSION/" buildozer.spec
+
+      - name: Commit updated CHANGELOG.md + buildozer.spec
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md buildozer.spec
+          git diff --cached --quiet || git commit -m "chore: update CHANGELOG.md and version for ${{ github.ref_name }}"
+          git push origin HEAD:main
+
+  build-apk:
+    needs: update-changelog
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main  # use updated main (with changelog committed above)
 
       - uses: actions/setup-java@v4
         with:
@@ -29,24 +95,28 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install system dependencies (python-for-android / Buildozer)
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             git zip unzip openjdk-17-jdk autoconf libtool pkg-config \
             zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 \
             cmake libffi-dev libssl-dev automake build-essential \
-            libltdl-dev
+            libltdl-dev ccache
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.ccache
+            ~/.cache/ccache
+          key: ccache-${{ hashFiles('buildozer.spec') }}
+          restore-keys: ccache-
 
       - name: Install Buildozer and Cython
         run: |
           python -m pip install --upgrade pip
           pip install buildozer==1.5.0 cython==0.29.36
-
-      - name: Set version from input
-        run: |
-          sed -i "s/^version = .*/version = ${{ inputs.version }}/" buildozer.spec
-          grep "^version = " buildozer.spec
 
       - name: Cache Buildozer directories
         uses: actions/cache@v4
@@ -54,28 +124,22 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-release-${{ hashFiles('buildozer.spec') }}
-          restore-keys: buildozer-release-
+          key: buildozer-${{ hashFiles('buildozer.spec') }}
+          restore-keys: buildozer-
 
-      - name: Build debug-signed APK
-        # NOTE: this is a debug-signed build (installable/sideloadable
-        # immediately, no keystore setup needed). If you want a properly
-        # release-signed APK (e.g. for the Play Store), add a keystore as
-        # repo secrets and switch this step to `buildozer -v android
-        # release` plus a jarsigner/apksigner + zipalign step.
+      - name: Build debug APK
         run: buildozer -v android debug
 
-      - name: Prepare release asset
-        run: |
-          mkdir -p dist
-          cp bin/*.apk "dist/plus2cipher-${{ inputs.version }}.apk"
-          ls -la dist/
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: plus2cipher-${{ needs.update-changelog.outputs.version }}-apk
+          path: bin/*.apk
+          if-no-files-found: error
 
-      - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "v${{ inputs.version }}" \
-            "dist/plus2cipher-${{ inputs.version }}.apk" \
-            --title "+2 Cipher v${{ inputs.version }}" \
-            --notes "+2 Cipher v${{ inputs.version }}. Debug-signed APK -- install directly on Android with \"unknown sources\" allowed, or via ADB."
+      - name: Create GitHub Release with APK
+        uses: softprops/action-gh-release@v2
+        with:
+          files: bin/*.apk
+          body_path: CHANGELOG.md
+          name: "v${{ needs.update-changelog.outputs.version }}"

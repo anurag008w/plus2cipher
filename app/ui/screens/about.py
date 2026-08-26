@@ -41,6 +41,32 @@ def _read_version() -> str:
     return "1.0.0"
 
 
+def _read_changelog() -> str:
+    """Read and format changelog from CHANGELOG.md automatically."""
+    try:
+        import os
+        cl_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "CHANGELOG.md")
+        cl_path = os.path.abspath(cl_path)
+        with open(cl_path) as f:
+            lines = f.readlines()
+        sections = []
+        current = []
+        for line in lines:
+            line = line.rstrip()
+            if line.startswith("## "):
+                if current:
+                    sections.append("\n".join(current))
+                    current = []
+                current.append(line[3:])  # version heading e.g. "1.1.0"
+            elif line.startswith("- ") and current:
+                current.append("  • " + line[2:])
+        if current:
+            sections.append("\n".join(current))
+        return "\n\n".join(sections)
+    except Exception:
+        return f"{APP_VERSION} — See CHANGELOG.md for details."
+
+
 APP_VERSION = _read_version()
 
 
@@ -156,11 +182,7 @@ class AboutScreen(ThemedBehavior, Screen):
 
         outer.add_widget(_InfoSection(
             "Changelog",
-            "1.1.0 — Bug fixes: keyboard opens reliably on quick tap, ghost tooltips removed "
-            "on Android, history saves after typing pause (not every keystroke), fixed crash "
-            "on History/Favorites tab.\n\n"
-            "1.0.0 — Initial release: encode/decode, history, favorites, "
-            "accent themes, and full desktop + Android support.",
+            _read_changelog(),
         ))
 
         outer.add_widget(_LinkRow("github", "GitHub Repository", "View or contribute to the source", on_press=lambda *a: webbrowser.open("https://github.com/anurag008w/plus2cipher")))
